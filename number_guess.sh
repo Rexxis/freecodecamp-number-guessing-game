@@ -15,20 +15,21 @@ USERNAME_DATA=$($PSQL "SELECT username, games_played, best_game FROM userdata WH
 # if username not exist
 if [[ -z $USERNAME_DATA ]]
 then
+  # insert new user data
+  INSERT_NEW_USER_RESULT=$($PSQL "INSERT INTO userdata(username, games_played, best_game) VALUES ('$USERNAME', 0, NULL)")
   # welcome new user msg
   echo "Welcome, $USERNAME! It looks like this is your first time here."
   echo "Guess the secret number between 1 and 1000:"
   GAME
-  # function main game
 else
 # if username exist
   # welcome existing user message 
   echo "$USERNAME_DATA" | while IFS="|" read USERNAME GAMES_PLAYED BEST_GAME
   do
     echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
-    echo "Guess the secret number between 1 and 1000:"
-  # function main game
   done
+  echo "Guess the secret number between 1 and 1000:"
+  GAME
 fi
 }
 
@@ -53,9 +54,27 @@ GAME() {
       let "STEPS+=1"
       GAME
     else
+      # get games played and best game data
+      GAMES_PLAYED=$($PSQL "SELECT games_played FROM userdata WHERE username = '$USERNAME'")
+      BEST_GAME=$($PSQL "SELECT best_game FROM userdata WHERE username = '$USERNAME'")
+      # increment steps and games played data
       let "STEPS+=1"
+      let "GAMES_PLAYED+=1"
       echo "You guessed it in $STEPS tries. The secret number was $SECRET_NUMBER. Nice job!"
+      # INSERT GAMES PLAYED +1
+      UPDATE_GAMES_PLAYED_RESULT=$($PSQL "UPDATE userdata SET games_played = $GAMES_PLAYED WHERE username = '$USERNAME'")
+      # IF STEPS < BEST_GAME -> UPDATE BEST_GAME with STEPS 
+      if [[ $STEPS -lt $BEST_GAME ]]
+      then
+        #insert new best game
+        UPDATE_BEST_GAME_RESULT=$($PSQL "UPDATE userdata SET best_game = $STEPS WHERE username = '$USERNAME'")
+      else
+        UPDATE_BEST_GAME_RESULT=$($PSQL "UPDATE userdata SET best_game = $STEPS WHERE username = '$USERNAME'")
+      fi
     fi
+  else
+    echo "That is not an integer, guess again:"
+    GAME
   fi
 }
     # STEPS +1
@@ -66,10 +85,6 @@ GAME() {
    # GAME()
   # if guess == SECRET_NUMBER
     # echo you guessed it in STEPS tries. The secret number was SECRET_NUMBER. Nice job!
-    # GET GAMES PLAYED
-    # INSERT GAMES PLAYED +1
-    # GET BEST_GAME
-    # IF STEPS < BEST_GAME -> UPDATE BEST_GAME with STEPS 
 # else
   # echo That is not an integer, guess again:
 

@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# global var STEPS=0
-# generate SECRET_NUMBER=generate()
+PSQL="psql --username=freecodecamp --dbname=number_guess -t --no-align -c"
+
+STEPS=0
+SECRET_NUMBER=$(echo $(( $RANDOM % 1000 + 1 )))
 
 # prompt user enter username
 

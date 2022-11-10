@@ -4,7 +4,6 @@ PSQL="psql --username=freecodecamp --dbname=number_guess -t --no-align -c"
 
 STEPS=0
 SECRET_NUMBER=$(echo $(( $RANDOM % 1000 + 1 )))
-echo $SECRET_NUMBER
 
 MAIN() {
 # start prompt
@@ -77,15 +76,5 @@ GAME() {
     GAME
   fi
 }
-    # STEPS +1
-    # GAME()
-  # if guess higher SECRET NUMBER
-   # its lower than that
-   # STEPS +1
-   # GAME()
-  # if guess == SECRET_NUMBER
-    # echo you guessed it in STEPS tries. The secret number was SECRET_NUMBER. Nice job!
-# else
-  # echo That is not an integer, guess again:
 
-  MAIN
+MAIN
